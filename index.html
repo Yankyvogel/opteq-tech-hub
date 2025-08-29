@@ -18,10 +18,19 @@
     <meta name="twitter:site" content="@OpteqSolutions" />
     <meta name="twitter:image" content="https://opteqsolutions.com/favicon.png" />
     
-    <!-- Google reCAPTCHA -->
-    <script src="https://www.google.com/recaptcha/enterprise.js?render=6Ldpr7QrAAAAF8nxFnfuPLjgtUmL35HLjH65_aT" async defer></script>
-    <script type="module" crossorigin src="/assets/index-Ct35eS35.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CeblUCSs.css">
+    <!-- Google reCAPTCHA Enterprise with callback -->
+    <script>
+      function onRecaptchaLoad() {
+        console.log('reCAPTCHA script loaded, waiting for app initialization');
+        // The actual initialization will be handled by the React app
+        if (window.onRecaptchaLoad) {
+          window.onRecaptchaLoad();
+        }
+      }
+    </script>
+    <script src="https://www.google.com/recaptcha/enterprise.js?onload=onRecaptchaLoad&render=6Ldpr7QrAAAAF8nxFnfuPLjgtUmL35HLjH65_aT" async defer></script>
+    <script type="module" crossorigin src="/assets/index-J3v7FHGa.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-mtg0EBLd.css">
   </head>
 
   <body>

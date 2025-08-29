@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reCAPTCHA Test - OpteqSolutions</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; margin: 10px 5px; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #log { background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>reCAPTCHA Enterprise Test Page</h1>
+    <p>This page helps generate the token requests needed to complete your reCAPTCHA setup.</p>
+    
+    <div id="status" class="status info">
+        Initializing reCAPTCHA...
+    </div>
+    
+    <div>
+        <button onclick="generateToken('manual_test')">Generate Test Token</button>
+        <button onclick="generateToken('form_submit')">Simulate Form Submit</button>
+        <button onclick="generateToken('user_action')">Simulate User Action</button>
+        <button onclick="startAutoGeneration()">Start Auto Generation</button>
+        <button onclick="stopAutoGeneration()">Stop Auto Generation</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <h3>Activity Log:</h3>
+    <div id="log"></div>
+
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6Ldpr7QrAAAAF8nxFnfuPLjgtUmL35HLjH65_aT"></script>
+    <script>
+        const SITE_KEY = '6Ldpr7QrAAAAF8nxFnfuPLjgtUmL35HLjH65_aT';
+        let autoInterval = null;
+        let tokenCount = 0;
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+
+        async function generateToken(action) {
+            try {
+                updateStatus(`Generating token for: ${action}`, 'info');
+                log(`Requesting token for action: ${action}`);
+                
+                const token = await grecaptcha.enterprise.execute(SITE_KEY, {
+                    action: action
+                });
+                
+                tokenCount++;
+                log(`✓ Token #${tokenCount} generated successfully (${token.substring(0, 20)}...)`);
+                updateStatus(`Token generated successfully! Total: ${tokenCount}`, 'success');
+                
+                // Simulate backend verification
+                setTimeout(() => {
+                    log(`✓ Token verified on backend (simulated)`);
+                }, 500);
+                
+                return token;
+            } catch (error) {
+                log(`✗ Error generating token: ${error.message}`);
+                updateStatus(`Error: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        function startAutoGeneration() {
+            if (autoInterval) {
+                log('Auto generation already running');
+                return;
+            }
+            
+            log('Starting automatic token generation every 30 seconds');
+            updateStatus('Auto generation started', 'info');
+            
+            autoInterval = setInterval(() => {
+                generateToken('auto_periodic');
+            }, 30000); // Every 30 seconds
+        }
+
+        function stopAutoGeneration() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                log('Stopped automatic token generation');
+                updateStatus('Auto generation stopped', 'info');
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Initialize when page loads
+        grecaptcha.enterprise.ready(() => {
+            log('reCAPTCHA Enterprise is ready');
+            updateStatus('reCAPTCHA ready - you can now generate tokens', 'success');
+            
+            // Generate initial token
+            generateToken('page_load_test');
+            
+            // Generate a few more tokens with different actions to show activity
+            setTimeout(() => generateToken('initial_verification'), 2000);
+            setTimeout(() => generateToken('security_check'), 4000);
+            setTimeout(() => generateToken('user_verification'), 6000);
+        });
+    </script>
+</body>
+</html>
